@@ -1,30 +1,29 @@
 # livego
-简单高效的直播服务器：
-- 安装和使用非常简单；
-- 纯 Golang 编写，性能高，跨平台；
-- 支持常用的传输协议、文件格式、编码格式；
+## Simple and efficient live server:
+* Installation and use is very simple;
+* Writin in pure Golang, high performance, cross-platform;
+* Support common transmission protocols, file formats, and encoding formats;
 
-#### 支持的传输协议
-- [x] RTMP
-- [x] AMF
-- [x] HLS
-- [x] HTTP-FLV
+#### Supported transport protocols
+- RTMP
+- AMF
+- HLS
+- HTTP-FLV
 
-#### 支持的容器格式
-- [x] FLV
-- [x] TS
+#### Supported container formats
+- FLV
+- TS
 
-#### 支持的编码格式
-- [x] H264
-- [x] AAC
-- [x] MP3
+#### Supported encoding formats
+- H264
+- AAC
+- MP3
 
-## 安装
-直接下载编译好的[二进制文件](https://github.com/gwuhaolin/livego/releases)后，在命令行中执行。
+## Installation
+After downloading the compiled binary directly, execute it on the command line.(https://github.com/bcrowe/livego/releases)
 
-#### 从源码编译
-1. 下载源码 `git clone https://github.com/gwuhaolin/livego.git`
-2. 去 livego 目录中 执行 `go build`
+#### Download Source Code git clone
+1. Go to the livego directory and execute go build `git clone https://github.com/gwuhaolin/livego.git`
 
 ## 使用
 2. 启动服务：执行 `livego` 二进制文件启动 livego 服务；

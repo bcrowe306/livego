@@ -2,19 +2,19 @@ package rtmp
 
 import (
 	"errors"
-	"flag"
 	"fmt"
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/configure"
-	"github.com/gwuhaolin/livego/container/flv"
-	"github.com/gwuhaolin/livego/protocol/rtmp/core"
-	"github.com/gwuhaolin/livego/utils/uid"
+	"livego/router"
 	"log"
 	"net"
 	"net/url"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/gwuhaolin/livego/av"
+	"github.com/gwuhaolin/livego/container/flv"
+	"github.com/gwuhaolin/livego/protocol/rtmp/core"
+	"github.com/gwuhaolin/livego/utils/uid"
 )
 
 const (
@@ -23,8 +23,10 @@ const (
 )
 
 var (
-	readTimeout  = flag.Int("readTimeout", 10, "read time out")
-	writeTimeout = flag.Int("writeTimeout", 10, "write time out")
+	// readTimeout = flag.Int("readTimeout", 10, "read time out")
+	readTimeout = 10
+	// writeTimeout = flag.Int("writeTimeout", 10, "write time out")
+	writeTimeout = 10
 )
 
 type Client struct {
@@ -110,9 +112,10 @@ func (s *Server) handleConn(conn *core.Conn) error {
 		return err
 	}
 
-	appname, _, _ := connServer.GetInfo()
+	appname, stream, url := connServer.GetInfo()
+	log.Println(appname, stream, url)
 
-	if ret := configure.CheckAppName(appname); !ret {
+	if ret := router.CheckAppName(appname); !ret {
 		err := errors.New("application name=%s is not configured")
 		conn.Close()
 		log.Println("CheckAppName err:", err)
@@ -121,7 +124,7 @@ func (s *Server) handleConn(conn *core.Conn) error {
 
 	log.Printf("handleConn: IsPublisher=%v", connServer.IsPublisher())
 	if connServer.IsPublisher() {
-		if pushlist, ret := configure.GetStaticPushUrlList(appname); ret && (pushlist != nil) {
+		if pushlist, ret := router.GetRoute(appname + "/" + stream); ret && (pushlist != nil) {
 			log.Printf("GetStaticPushUrlList: %v", pushlist)
 		}
 		reader := NewVirReader(connServer)
@@ -180,7 +183,7 @@ func NewVirWriter(conn StreamReadWriteCloser) *VirWriter {
 	ret := &VirWriter{
 		Uid:         uid.NewId(),
 		conn:        conn,
-		RWBaser:     av.NewRWBaser(time.Second * time.Duration(*writeTimeout)),
+		RWBaser:     av.NewRWBaser(time.Second * time.Duration(writeTimeout)),
 		packetQueue: make(chan *av.Packet, maxQueueNum),
 		WriteBWInfo: StaticsBW{0, 0, 0, 0, 0, 0, 0, 0},
 	}
@@ -284,7 +287,7 @@ func (v *VirWriter) Write(p *av.Packet) (err error) {
 }
 
 func (v *VirWriter) SendPacket() error {
-	Flush := reflect.ValueOf(v.conn).MethodByName("Flush");
+	Flush := reflect.ValueOf(v.conn).MethodByName("Flush")
 	var cs core.ChunkStream
 	for {
 		p, ok := <-v.packetQueue
@@ -313,7 +316,7 @@ func (v *VirWriter) SendPacket() error {
 				v.closed = true
 				return err
 			}
-			Flush.Call(nil);
+			Flush.Call(nil)
 		} else {
 			return errors.New("closed")
 		}
@@ -356,7 +359,7 @@ func NewVirReader(conn StreamReadWriteCloser) *VirReader {
 	return &VirReader{
 		Uid:        uid.NewId(),
 		conn:       conn,
-		RWBaser:    av.NewRWBaser(time.Second * time.Duration(*writeTimeout)),
+		RWBaser:    av.NewRWBaser(time.Second * time.Duration(writeTimeout)),
 		demuxer:    flv.NewDemuxer(),
 		ReadBWInfo: StaticsBW{0, 0, 0, 0, 0, 0, 0, 0},
 	}

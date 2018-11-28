@@ -2,13 +2,14 @@ package rtmp
 
 import (
 	"errors"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/gwuhaolin/livego/av"
 	"github.com/gwuhaolin/livego/protocol/rtmp/cache"
 	"github.com/gwuhaolin/livego/protocol/rtmp/rtmprelay"
 	"github.com/orcaman/concurrent-map"
-	"log"
-	"strings"
-	"time"
 )
 
 var (
@@ -145,8 +146,8 @@ func (s *Stream) AddWriter(w av.WriteCloser) {
 	s.ws.Set(info.UID, pw)
 }
 
-/*检测本application下是否配置static_push,
-如果配置, 启动push远端的连接*/
+/*Check if static_push is configured in this application.
+If configured, start the push remote connection */
 func (s *Stream) StartStaticPush() {
 	key := s.info.Key
 
@@ -160,18 +161,21 @@ func (s *Stream) StartStaticPush() {
 		return
 	}
 
-	streamname := key[index+1:]
+	// This variable is used to add the streamkey to the end of the url. I do not want this behavior to take place here
+	// streamname := key[index+1:]
 	appname := dscr[0]
 
-	log.Printf("StartStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(appname)
+	log.Printf("StartStaticPush: current， appname=%s", appname)
+	pushurllist, err := rtmprelay.GetStaticPushList(key)
 	if err != nil || len(pushurllist) < 1 {
 		log.Printf("StartStaticPush: GetStaticPushList error=%v", err)
 		return
 	}
 
 	for _, pushurl := range pushurllist {
-		pushurl := pushurl + "/" + streamname
+
+		// This code again added the streamkey to the end of the stream url. I do not want this functionality to take place here
+		// pushurl := pushurl + "/" + streamname
 		log.Printf("StartStaticPush: static pushurl=%s", pushurl)
 
 		staticpushObj := rtmprelay.GetAndCreateStaticPushObject(pushurl)
@@ -205,7 +209,7 @@ func (s *Stream) StopStaticPush() {
 	appname := dscr[0]
 
 	log.Printf("StopStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(appname)
+	pushurllist, err := rtmprelay.GetStaticPushList(key)
 	if err != nil || len(pushurllist) < 1 {
 		log.Printf("StopStaticPush: GetStaticPushList error=%v", err)
 		return
@@ -228,16 +232,13 @@ func (s *Stream) StopStaticPush() {
 
 func (s *Stream) IsSendStaticPush() bool {
 	key := s.info.Key
-
 	dscr := strings.Split(key, "/")
 	if len(dscr) < 1 {
 		return false
 	}
 
-	appname := dscr[0]
-
 	//log.Printf("SendStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(appname)
+	pushurllist, err := rtmprelay.GetStaticPushList(key)
 	if err != nil || len(pushurllist) < 1 {
 		//log.Printf("SendStaticPush: GetStaticPushList error=%v", err)
 		return false
@@ -248,10 +249,7 @@ func (s *Stream) IsSendStaticPush() bool {
 		return false
 	}
 
-	streamname := key[index+1:]
-
 	for _, pushurl := range pushurllist {
-		pushurl := pushurl + "/" + streamname
 		//log.Printf("SendStaticPush: static pushurl=%s", pushurl)
 
 		staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl)
@@ -279,18 +277,21 @@ func (s *Stream) SendStaticPush(packet av.Packet) {
 		return
 	}
 
-	streamname := key[index+1:]
-	appname := dscr[0]
+	// This variable was used to place the streamkey on the end of the URL. I don't want this behavior here.
+	// streamname := key[index+1:]
+	// appname := dscr[0]
 
 	//log.Printf("SendStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(appname)
+	pushurllist, err := rtmprelay.GetStaticPushList(key)
 	if err != nil || len(pushurllist) < 1 {
 		//log.Printf("SendStaticPush: GetStaticPushList error=%v", err)
 		return
 	}
 
 	for _, pushurl := range pushurllist {
-		pushurl := pushurl + "/" + streamname
+
+		// This code was taking the streamkey and placing it on the end of the url. I dont want this behavior to take place here
+		// pushurl := pushurl + "/" + streamname
 		//log.Printf("SendStaticPush: static pushurl=%s", pushurl)
 
 		staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl)

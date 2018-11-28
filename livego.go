@@ -2,14 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/gwuhaolin/livego/configure"
-	"github.com/gwuhaolin/livego/protocol/hls"
-	"github.com/gwuhaolin/livego/protocol/httpflv"
-	"github.com/gwuhaolin/livego/protocol/httpopera"
-	"github.com/gwuhaolin/livego/protocol/rtmp"
+	"livego/api"
+	"livego/backends"
+	"livego/protocol/rtmp"
 	"log"
 	"net"
 	"time"
+
+	"github.com/gwuhaolin/livego/protocol/hls"
+	"github.com/gwuhaolin/livego/protocol/httpflv"
+	"github.com/gwuhaolin/livego/protocol/httpopera"
 )
 
 var (
@@ -115,16 +117,20 @@ func main() {
 		}
 	}()
 	log.Println("start livego, version", version)
-	err := configure.LoadConfig(*configfilename)
-	if err != nil {
-		return
-	}
+
+	log.Println("Loading Backend!")
+	backends.SetBackend("yaml")
+	// Old configuration load
+	// err := configure.LoadConfig(*configfilename)
+	// if err != nil {
+	// 	return
+	// }
 
 	stream := rtmp.NewRtmpStream()
 	hlsServer := startHls()
 	startHTTPFlv(stream)
-	startHTTPOpera(stream)
-
+	// startHTTPOpera(stream)
+	api.Start()
 	startRtmp(stream, hlsServer)
 	//startRtmp(stream, nil)
 }

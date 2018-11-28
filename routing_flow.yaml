@@ -1,0 +1,15 @@
+livego: "Stream Relay Flow"
+  TransStart:
+    - StartStaticPush:
+      - rtmprelay.GetStaticPushList():
+      - rtmprelay.GetAndCreateStaticPushObject(pushurl):
+        staticPushObject.start():
+    - IsSendStaticPush():
+      SendStaticPush:
+        - rtmprelay.GetStaticPushList(appname):
+        - rtmprelay.GetStaticPushObject(pushurl):
+
+
+      
+
+

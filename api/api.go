@@ -16,17 +16,11 @@ func Start(port string) {
 	}
 	log.Println("Starting API")
 	r := gin.Default()
-
+	r.Delims("{[{", "}]}")
+	r.LoadHTMLFiles("./www/index.html")
+	r.Static("/assets", "./www./assets")
 	r.GET("/", func(c *gin.Context) {
-		var msg struct {
-			Name    string `json:"user"`
-			Message string `json:"message"`
-			Number  int    `json:"number"`
-		}
-		msg.Name = "Lena"
-		msg.Message = "hey"
-		msg.Number = 123
-		c.JSON(http.StatusOK, msg)
+		c.HTML(http.StatusOK, "index.html", gin.H{"user": "bcrowe"})
 	})
 	v := r.Group("/api")
 	{

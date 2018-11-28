@@ -4,6 +4,7 @@ import (
 	"flag"
 	"livego/api"
 	"livego/backends"
+	"livego/config"
 	"livego/protocol/rtmp"
 	"log"
 	"net"
@@ -21,6 +22,7 @@ var (
 	hlsAddr        = flag.String("hls-addr", ":7002", "HLS server listen address")
 	operaAddr      = flag.String("manage-addr", ":8090", "HTTP manage interface server listen address")
 	configfilename = flag.String("cfgfile", "livego.cfg", "live configure filename")
+	cfg            = flag.String("c", "./config.yaml", "Configuration file path.")
 )
 
 func init() {
@@ -117,20 +119,23 @@ func main() {
 		}
 	}()
 	log.Println("start livego, version", version)
-
+	flag.Parse()
+	err := config.LoadConfig(*cfg)
+	if err != nil {
+		log.Println(err)
+	}
 	log.Println("Loading Backend!")
-	backends.SetBackend("yaml")
+	backends.SetBackend()
 	// Old configuration load
 	// err := configure.LoadConfig(*configfilename)
 	// if err != nil {
 	// 	return
 	// }
-
 	stream := rtmp.NewRtmpStream()
 	hlsServer := startHls()
 	startHTTPFlv(stream)
 	// startHTTPOpera(stream)
-	api.Start()
+	api.Start(config.Data.APIPort)
 	startRtmp(stream, hlsServer)
 	//startRtmp(stream, nil)
 }

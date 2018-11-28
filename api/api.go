@@ -10,7 +10,10 @@ import (
 )
 
 // Start : This function start the GIN http server.
-func Start() {
+func Start(port string) {
+	if port == "" {
+		port = "8080"
+	}
 	log.Println("Starting API")
 	r := gin.Default()
 
@@ -84,5 +87,6 @@ func Start() {
 			c.JSON(http.StatusOK, updatedRoute)
 		})
 	}
-	r.Run(":8888")
+
+	r.Run(":" + port)
 }

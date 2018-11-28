@@ -3,6 +3,7 @@ package yamlbackend
 import (
 	"io/ioutil"
 	"livego/backends/models"
+	"livego/config"
 	"log"
 	"os"
 	"sync"
@@ -23,10 +24,13 @@ type DB struct {
 
 // Init :This function Initialized the YAML backend
 func (y *DB) Init() {
-	if y.FileName == "" {
+	file, exist := config.Data.Backend["file"]
+	if !exist || file == "" {
 		log.Println("No route file configured. Setting routes file to ./routes.yaml")
 		y.FileName = "./routes.yaml"
 	}
+	log.Printf("Route yaml file setting found. Setting routes file to %s", file)
+	y.FileName = file
 	y.NewRoutesInstance()
 	y.Load()
 

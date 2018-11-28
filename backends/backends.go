@@ -3,6 +3,7 @@ package backends
 import (
 	"livego/backends/models"
 	"livego/backends/yamlbackend"
+	"livego/config"
 	"log"
 )
 
@@ -19,10 +20,13 @@ type Backend interface {
 var DB Backend
 
 // SetBackend :This function sets the backend db to be used with the program
-func SetBackend(bkend string) {
-	log.Printf("Setting Backend to %s", bkend)
-	DB = &yamlbackend.DB{}
-	DB.Init()
+func SetBackend() {
 
 	log.Println("Database Loaded")
+	switch config.Data.Backend["name"] {
+	case "yaml":
+		log.Printf("Setting Backend to %s", config.Data.Backend["name"])
+		DB = &yamlbackend.DB{}
+		DB.Init()
+	}
 }

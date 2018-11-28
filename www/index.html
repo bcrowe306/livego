@@ -158,7 +158,7 @@
               </thead>
               <tbody>
                 <tr v-for="(r, key) in routes" :key="key">
-                  <td> {{key}} </td>
+                  <td> <router-link :to="`/routes/${key}`">{{key}}</router-link> </td>
                   <td> {{r.Stream}} </td>
                   <td> {{r.CopyKey}} </td>
                   <td> {{r.Enabled}} </td>
@@ -173,6 +173,61 @@
         <div class="row">
           <div class="col">footer</div>
         </div>
+      </div>
+    </script>
+
+    <!-- Route Template -->
+    <script type="text/x-template" id="route">
+      <div class="container-fluid">
+        <div class="row">
+          <h1>App Route <small>{{app}}</small></h1>
+        </div>
+        <div class="row">
+          <div class="col">
+            <form>
+              <div class="form-group">
+                <label for="exampleInputEmail1">Stream</label>
+                <input v-model="route.Stream" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Stream Key">
+                <small id="emailHelp" class="form-text text-muted">If you specify a stream key, it will be matched on incoming streams.</small>
+              </div>
+              <div class="form-check mb-3">
+                <input v-model="route.CopyKey" type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">CopyKey</label>
+              </div>
+              <div class="form-check mb-3">
+                <input v-model="route.Enabled" type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Enabled</label>
+              </div>
+              <h3>Endpoints</h3>
+              <hr>
+              <div class="row">
+                <div class="col-4" v-for="(e, key) in route.Endpoints" :key="key">
+                  <div class="card text-white bg-info mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title">Endpoint</h5>
+                      <h6 class="card-subtitle mb-2">{{e.ID}}</h6>
+                      <p class="card-text">
+                        <ul style="list-style:none;" class="list-group">
+                          <li><strong class="mr-3">Host:</strong>{{e.Host}}</li>
+                          <li><strong class="mr-3">Port:</strong>{{e.Port}}</li>
+                          <li><strong class="mr-3">App:</strong>{{e.App}}</li>
+                          <li><strong class="mr-3">Stream:</strong>{{e.Stream}}</li>
+                          <li><strong class="mr-3">Enabled:</strong>{{e.Enabled}}</li>
+                        </ul>
+                      </p>
+                      <button href="#" class="btn btn-light card-link"><span class="sr-only">(current)</span> Disable</button>
+                      <button href="#" class="btn btn-light card-link">
+                        <span data-feather="home"></span>Delete <span class="sr-only">(current)</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="submit" class="btn btn-primary mt-3">Submit</button>
+              <router-link to="/routes" class="btn btn-default mt-3">cancel</button>
+            </form>
+          </div>
       </div>
     </script>
 

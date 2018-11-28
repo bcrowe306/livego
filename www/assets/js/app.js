@@ -31,6 +31,25 @@ const Routes = {
     methods: {},
     computed: {}
 }
+const Route = { 
+    template: '#route' ,
+    created: function () {
+        this.$http.get(`http://localhost:8080/api/routes/${this.$route.params.id}`).then(res => {
+            this.route = res.data
+            console.log(res.data)
+            this.app = this.$route.params.id
+        })
+    },
+    data : function () {
+        return {
+            title: 'Routes',
+            route: {},
+            app: ""
+        }
+    },
+    methods: {},
+    computed: {}
+}
 const Configuration = { 
     template: '#configuration' ,
     created: {},
@@ -89,6 +108,7 @@ const routes = [
     { path: '/', redirect: '/dashboard'},
     { path: '/dashboard', component: Dashboard },
     { path: '/routes', component: Routes },
+    { path: '/routes/:id', component: Route },
     { path: '/configuration', component: Configuration },
     { path: '/stats', component: Stats },
     { path: '/admin', component: Admin },

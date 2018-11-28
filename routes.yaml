@@ -1,6 +1,6 @@
 1DZf4NTWtAU0OdxLmKDpFHHITLB:
   CopyKey: false
-  Enabled: true
+  Enabled: false
   Endpoints:
   - ID: 1DZf4MM4kLayuz9BQVbiATl6jA1
     Host: bcrowe.softether.net
@@ -18,23 +18,13 @@
     App: live
     Stream: 41a11e05-f250-4e54-86f8-6c90d660971e
     Enabled: true
-1DauBLDmXk8CYai4ujhv29Dx240:
+1Dd6DmrUu0dAOThcuMOdaTknywY:
   CopyKey: false
   Enabled: true
   Endpoints:
-  - ID: 1DauBQ5JHO9N379mBYfh1TtEk7S
+  - ID: 1Dd6Dp8cB7fjFxkvAyNrD3fssfo
     Host: bcrowe.softether.net
-    Port: "7058"
+    Port: "1935"
     App: live
-    Stream: 41a11e05-f250-4e54-86f8-6c90d660971e
-    Enabled: true
-1DauFYYFYcpKWEZy8TkOiKHEhv8:
-  CopyKey: false
-  Enabled: true
-  Endpoints:
-  - ID: 1DauFTA3i3psOpxLjtGCZzXt9TD
-    Host: bcrowe.softether.net
-    Port: "7058"
-    App: live
-    Stream: 41a11e05-f250-4e54-86f8-6c90d660971e
+    Stream: Jerome@6
     Enabled: true

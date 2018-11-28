@@ -2,23 +2,41 @@
 const Dashboard = { 
     template: '#dashboard' ,
     created: function (){
-        this.$http.get('http://localhost:8080/api/routes').then(res => {
+        this.$http.get('/api/routes').then(res => {
             this.routes = res.data
+        })
+        this.$http.get('/api/config').then(res => {
+            this.config = res.data
+        }).catch(err => {
+            console.log(err)
         })
     },
     data : function () {
         return {
             title: 'Dashboard',
-            routes: {}
+            routes: {},
+            config: {},
+            search:""
         }
     },
     methods: {},
-    computed: {}
+    computed: {
+        routesFiltered (){
+            var self = this
+            var col = _.map(this.routes, function (v,k,o) {
+                v.ID = k
+                return v
+            })
+            return _.filter(col, function (v, k, o) {
+                return v.ID.toLowerCase().includes(self.search.toLowerCase())
+            })
+        }
+    }
 }
 const Routes = { 
     template: '#routes' ,
     created: function () {
-        this.$http.get('http://localhost:8080/api/routes').then(res => {
+        this.$http.get('/api/routes').then(res => {
             this.routes = res.data
         })
     },
@@ -34,28 +52,141 @@ const Routes = {
 const Route = { 
     template: '#route' ,
     created: function () {
-        this.$http.get(`http://localhost:8080/api/routes/${this.$route.params.id}`).then(res => {
+        this.$http.get(`/api/routes/${this.$route.params.id}`).then(res => {
             this.route = res.data
-            console.log(res.data)
             this.app = this.$route.params.id
         })
     },
     data : function () {
         return {
-            title: 'Routes',
+            title: 'Route',
             route: {},
-            app: ""
+            app: "",
+            newEndpoint: {
+                Host: '',
+                Port: "1935",
+                App: '',
+                Stream: '',
+                Enabled: true,
+            },
+            editingEndpoint: {
+                Host: '',
+                Port: "1935",
+                App: '',
+                Stream: '',
+                Enabled: true,
+            },
+            editingIndex: 0
         }
     },
-    methods: {},
+    methods: {
+        showAddEndpoint: function() {
+            $('#addEndpoint').modal('show')
+        },
+        toggleEndpoint: function (i) {
+            this.route.Endpoints[i].Enabled = !this.route.Endpoints[i].Enabled
+        },
+        addEndpoint: function (){
+            this.route.Endpoints.push(Vue.util.extend({}, this.newEndpoint))
+            $('#addEndpoint').modal('hide')
+        },
+        editEndpoint: function (i) {
+            this.editingIndex = i
+            this.editingEndpoint = Vue.util.extend({}, this.route.Endpoints[i])
+            $('#editEndpoint').modal('show')
+        },
+        saveEditEndpoint: function (){
+            $('#editEndpoint').modal('hide')
+            this.route.Endpoints[this.editingIndex] = this.editingEndpoint
+            
+        },
+        removeEndpoint: function(i){
+            this.route.Endpoints.splice(i,1)
+        },
+        save: function () {
+            this.$http.put(`/api/routes/${this.$route.params.id}`, this.route).then(res => {
+                this.$router.push('/routes')
+            })
+        }
+    },
+    computed: {}
+}
+const NewRoute = { 
+    template: '#route' ,
+    created: function () {
+    },
+    data : function () {
+        return {
+            title: 'Route',
+            route: {
+                Stream: '',
+                CopyKey: false,
+                Enabled: true,
+                Endpoints: []
+            },
+            app: "",
+            newEndpoint: {
+                Host: '',
+                Port: "1935",
+                App: '',
+                Stream: '',
+                Enabled: true,
+            },
+            editingEndpoint: {
+                Host: '',
+                Port: "1935",
+                App: '',
+                Stream: '',
+                Enabled: true,
+            },
+            editingIndex: 0
+        }
+    },
+    methods: {
+        showAddEndpoint: function() {
+            $('#addEndpoint').modal('show')
+        },
+        toggleEndpoint: function (i) {
+            this.route.Endpoints[i].Enabled = !this.route.Endpoints[i].Enabled
+        },
+        addEndpoint: function (){
+            this.route.Endpoints.push(Vue.util.extend({}, this.newEndpoint))
+            $('#addEndpoint').modal('hide')
+        },
+        editEndpoint: function (i) {
+            this.editingIndex = i
+            this.editingEndpoint = Vue.util.extend({}, this.route.Endpoints[i])
+            $('#editEndpoint').modal('show')
+        },
+        saveEditEndpoint: function () {
+            $('#editEndpoint').modal('hide')
+            this.route.Endpoints[this.editingIndex] = this.editingEndpoint
+
+        },
+        removeEndpoint: function(i){
+            this.route.Endpoints.splice(i,1)
+        },
+        save: function () {
+            this.$http.post(`/api/routes`, this.route).then(res => {
+                this.$router.push('/routes')
+            })
+        }
+    },
     computed: {}
 }
 const Configuration = { 
     template: '#configuration' ,
-    created: {},
+    created: function (){
+        this.$http.get('/api/config').then(res => {
+            this.config = res.data
+        }).catch(err => {
+            console.log(err)
+        })
+    },
     data : function () {
         return {
-            title: 'Configuration'
+            title: 'Configuration',
+            config:{}
         }
     },
     methods: {},
@@ -84,20 +215,7 @@ const Admin = {
     computed: {}
 }
 Vue.component('btnToolbar', {
-    template: `
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{title}}</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">Share</button>
-                <button class="btn btn-sm btn-outline-secondary">Export</button>
-            </div>
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                <span data-feather="calendar"></span>
-                This week
-            </button>
-        </div>
-    </div>`,
+    template: '#btn-toolbar',
     props:["title"]
 })
 Vue.component('bCard', {
@@ -108,6 +226,7 @@ const routes = [
     { path: '/', redirect: '/dashboard'},
     { path: '/dashboard', component: Dashboard },
     { path: '/routes', component: Routes },
+    { path: '/routes/new', component: NewRoute },
     { path: '/routes/:id', component: Route },
     { path: '/configuration', component: Configuration },
     { path: '/stats', component: Stats },

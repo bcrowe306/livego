@@ -3,17 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../../../favicon.ico">
 
-    <title>Dashboard Template for Bootstrap</title>
+    <title>Flowvizer Edge</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="/assets/css/dashboard.css" rel="stylesheet">
+    <link href="/assets/css/open-iconic-bootstrap.css" rel="stylesheet">
   </head>
 
   <body>
@@ -72,12 +70,22 @@
 
     <!-- Components -->
     <script type="text/x-template" id="card">
-      <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+      <div class="card mb-3" style="max-width: 18rem;">
         <div v-if="header" class="card-header">{{header}}</div>
         <div class="card-body">
           <h5 class="card-title">{{title}}</h5>
-          <p class="card-text">{{content}}</p>
+          <p v-if="content" class="card-text">{{content}}</p>
+          <slot></slot>
         </div>
+      </div>
+    </script>
+
+    <script type="text/x-template" id="btn-toolbar">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <span v-if="title" class="h2">{{title}}</span>
+        <slot name="title"><slot>
+        <slot><slot>
+        <slot name="actions"></slot>
       </div>
     </script>
     
@@ -89,49 +97,74 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col">
-            <btn-toolbar :title="title"></btn-toolbar>
+            <btn-toolbar :title="title">
+              <template slot="actions">
+                <div class="btn-toolbar mb-2 mb-md-0">
+                  <div class="btn-group mr-2">
+                      <button class="btn btn-sm btn-outline-secondary">Share</button>
+                      <button class="btn btn-sm btn-outline-secondary">Export</button>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                      <span data-feather="calendar"></span>
+                      This week
+                  </button>
+              </div>
+              </template>
+            </btn-toolbar>
           </div>
         </div>
         <div class="row">
           <div class="col-3">
-            <b-card title="API Port" content="Server is listening on 8080"></b-card>
+            <b-card class="shadow bg-info text-white" title="API Port">
+              <h4>:{{config.APIPort}}</h4>
+            </b-card>
           </div>
           <div class="col-3">
-            <b-card title="RTMP Port" content="RTMP Server is listening on port 1935"></b-card>
+            <b-card class="shadow bg-info text-white" title="RTMP Port">
+              <h4>:{{config.RTMPPort}}</h4>
+            </b-card>
           </div>
           <div class="col-3">
-            <b-card title="HLS Port" content="HLS Server is listening on port 7002"></b-card>
+            <b-card class="shadow bg-info text-white" title="HLS Port">
+              <h4>:{{config.HLSPort}}</h4>
+            </b-card>
           </div>
           <div class="col-3">
-            <b-card title="Backend Type" content="Server is using YAML backend."></b-card>
+            <b-card class="shadow bg-info text-white" title="Backend Config">
+              <h4 v-if="config.Backend">{{config.Backend.name}}</h4>
+            </b-card>
           </div>
         </div>
         <div class="row">
-          <div class="col">
-            <table class="table">
-              <thead class="thead-dark">
-                <th>ID</th>
-                <th>Sream</th>
-                <th>CopyKey</th>
-                <th>Enabled</th>
-                <th>Endpoint</th>
-              </thead>
-              <tbody>
-                <tr v-for="(r, key) in routes" :key="key">
-                  <td> {{key}} </td>
-                  <td> {{r.Stream}} </td>
-                  <td> {{r.CopyKey}} </td>
-                  <td> {{r.Enabled}} </td>
-                  <td>
-                    <h6 v-for="(e, key) in r.Endpoints">rtmp://{{e.Host}}/{{e.App}}/{{e.Stream}} </h6>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="col-xs-12 col-md-6">
+            <div class="shadow card">
+              <div class="card-body">
+                <h5 class="card-title">Routes</h5>
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Search</span>
+                  </div>
+                  <input v-model="search" type="text" class="form-control form-control-sm" aria-label="Dollar amount (with dot and two decimal places)">
+                </div>
+              </div>
+              <table class="table table-striped table-hover">
+                <thead class="thead-dark">
+                  <th>ID</th>
+                  <th>Sream</th>
+                  <th>CopyKey</th>
+                  <th>Enabled</th>
+                </thead>
+                <tbody>
+                  <tr v-for="(r, key) in routesFiltered" :key="key">
+                    <td> <router-link :to="`/routes/${r.ID}`">{{r.ID}}</router-link> </td>
+                    <td> {{r.Stream}} </td>
+                    <td> {{r.CopyKey}} </td>
+                    <td> <span :class="[r.Enabled ? 'oi-check text-success':'oi-circle-x text-danger']" class="oi"></span> </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col">footer</div>
         </div>
       </div>
       
@@ -148,30 +181,52 @@
         </div>
         <div class="row">
           <div class="col">
-            <table class="table">
-              <thead class="thead-dark">
-                <th>ID</th>
-                <th>Sream</th>
-                <th>CopyKey</th>
-                <th>Enabled</th>
-                <th>Endpoint</th>
-              </thead>
-              <tbody>
-                <tr v-for="(r, key) in routes" :key="key">
-                  <td> <router-link :to="`/routes/${key}`">{{key}}</router-link> </td>
-                  <td> {{r.Stream}} </td>
-                  <td> {{r.CopyKey}} </td>
-                  <td> {{r.Enabled}} </td>
-                  <td>
-                    <h6 v-for="(e, key) in r.Endpoints">rtmp://{{e.Host}}/{{e.App}}/{{e.Stream}} </h6>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="card shadow">
+              <div class="card-body justify-content-between d-flex">
+                
+                <div>
+                  <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" id="basic-addon1">Search</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Enter Host or Route" aria-label="Search" aria-describedby="basic-addon1">
+                  </div>
+                </div>
+                <div>
+                  <div class="btn-group" role="group" aria-label="Basic example">
+                    <button @click.prevent="$router.push('/routes/new')" type="button" class="btn btn-info btn-sm">Add Route</button>
+                    <button type="button" class="btn btn-secondary btn-sm">Middle</button>
+                    <button type="button" class="btn btn-secondary btn-sm">Right</button>
+                  </div>
+                </div>
+              </div>
+              <table class="table table-hover table-striped">
+                <thead class="thead-dark">
+                  <th>ID</th>
+                  <th>Sream</th>
+                  <th>CopyKey</th>
+                  <th>Enabled</th>
+                  <th>Endpoint</th>
+                  <th></th>
+                  <th></th>
+                </thead>
+                <tbody>
+                  <tr v-for="(r, key) in routes" :key="key">
+                    <td> <router-link :to="`/routes/${key}`">{{key}}</router-link> </td>
+                    <td> {{r.Stream}} </td>
+                    <td> {{r.CopyKey}} </td>
+                    <td> <span :class="[r.Enabled ? 'oi-check text-success':'oi-circle-x text-danger']" class="oi"></span> </td>
+                    <td>
+                      <h6 v-for="(e, key) in r.Endpoints">rtmp://{{e.Host}}/{{e.App}}/{{e.Stream}} </h6>
+                    </td>
+                    <td><a href=""><span :class="[r.Enabled ? 'text-success' : 'text-danger']" class="oi oi-power-standby"></span></a></td>
+                    <td><a href=""><span class="oi oi-trash text-info"></span></a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
           </div>
-        </div>
-        <div class="row">
-          <div class="col">footer</div>
         </div>
       </div>
     </script>
@@ -179,12 +234,146 @@
     <!-- Route Template -->
     <script type="text/x-template" id="route">
       <div class="container-fluid">
+
+        <!-- New Modal -->
+        <div class="modal" tabindex="-1" role="dialog" id="addEndpoint">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+
+                <!-- Form -->
+                <form @submit.prevent="addEndpoint()">
+
+                  <!-- Host -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Host</label>
+                    <input v-model="newEndpoint.Host" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Hostname">
+                    <small id="emailHelp" class="form-text text-muted">This can be hostname or ip address</small>
+                  </div>
+
+                  <!-- Port -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Port</label>
+                    <input v-model="newEndpoint.Port" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="1935">
+                    <small id="emailHelp" class="form-text text-muted">This is optional. The Default port is 1935</small>
+                  </div>
+
+                  <!-- App -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">App</label>
+                    <input v-model="newEndpoint.App" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Application name">
+                    <small id="emailHelp" class="form-text text-muted">This is the first parameter after port ie rtmp://[host]:[port]/<strong>[app]</strong>/[stream]</small>
+                  </div>
+
+                  <!-- Stream -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Stream</label>
+                    <input v-model="newEndpoint.Stream" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Stream Key">
+                    <small id="emailHelp" class="form-text text-muted">This is the first parameter after port ie rtmp://[host]:[port]/[app]/<strong>[stream]</strong></small>
+                  </div>
+
+                  <div class="form-check mb-3">
+                    <input v-model="newEndpoint.Enabled" type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1">Enabled</label>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" @click.prevent="addEndpoint()" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Modal -->
+        
+
+        <!-- Edit Modal -->
+        <div class="modal" tabindex="-1" role="dialog" id="editEndpoint">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+
+                <!-- Form -->
+                <form @submit.prevent="addEndpoint()">
+
+                  <!-- Host -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Host</label>
+                    <input v-model="editingEndpoint.Host" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Hostname">
+                    <small id="emailHelp" class="form-text text-muted">This can be hostname or ip address</small>
+                  </div>
+
+                  <!-- Port -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Port</label>
+                    <input v-model="editingEndpoint.Port" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="1935">
+                    <small id="emailHelp" class="form-text text-muted">This is optional. The Default port is 1935</small>
+                  </div>
+
+                  <!-- App -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">App</label>
+                    <input v-model="editingEndpoint.App" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Application name">
+                    <small id="emailHelp" class="form-text text-muted">This is the first parameter after port ie rtmp://[host]:[port]/<strong>[app]</strong>/[stream]</small>
+                  </div>
+
+                  <!-- Stream -->
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Stream</label>
+                    <input v-model="editingEndpoint.Stream" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Stream Key">
+                    <small id="emailHelp" class="form-text text-muted">This is the first parameter after port ie rtmp://[host]:[port]/[app]/<strong>[stream]</strong></small>
+                  </div>
+
+                  <div class="form-check mb-3">
+                    <input v-model="editingEndpoint.Enabled" type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1">Enabled</label>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" @click.prevent="saveEditEndpoint()" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Modal -->
+
+
         <div class="row">
-          <h1>App Route <small>{{app}}</small></h1>
+          <div class="col">
+            <btn-toolbar title="">
+              <template slot="title">
+                <div>
+                  <span class="h4">Application</span>
+                  <span class="h5">{{app}}</span>
+                </div>
+                <div class="btn-group" role="group" aria-label="Basic example">
+                  <button @click.prevent="showAddEndpoint()" type="button" class="btn btn-info btn-sm">Add Endpoint</button>
+                  <button type="button" class="btn btn-secondary btn-sm">Middle</button>
+                  <button type="button" class="btn btn-secondary btn-sm">Right</button>
+                </div>
+              </template>
+                
+            </btn-toolbar>
+          </div>
         </div>
         <div class="row">
           <div class="col">
-            <form>
+            <form @submit.prevent="save()">
               <div class="form-group">
                 <label for="exampleInputEmail1">Stream</label>
                 <input v-model="route.Stream" type="text" class="form-control" id="stream" aria-describedby="streamkey" placeholder="Enter Stream Key">
@@ -202,9 +391,9 @@
               <hr>
               <div class="row">
                 <div class="col-4" v-for="(e, key) in route.Endpoints" :key="key">
-                  <div class="card text-white bg-info mb-3">
+                  <div class="shadow card text-white bg-info mb-3">
                     <div class="card-body">
-                      <h5 class="card-title">Endpoint</h5>
+                      <a href="" class=" float-right text-white" @click.prevent="editEndpoint(key)"><span class="oi oi-pencil" title="Edit Endpoint" aria-hidden="true"></span></a>
                       <h6 class="card-subtitle mb-2">{{e.ID}}</h6>
                       <p class="card-text">
                         <ul style="list-style:none;" class="list-group">
@@ -215,17 +404,20 @@
                           <li><strong class="mr-3">Enabled:</strong>{{e.Enabled}}</li>
                         </ul>
                       </p>
-                      <button href="#" class="btn btn-light card-link"><span class="sr-only">(current)</span> Disable</button>
-                      <button href="#" class="btn btn-light card-link">
-                        <span data-feather="home"></span>Delete <span class="sr-only">(current)</span>
+                      <button @click.prevent="toggleEndpoint(key)" href="#" class="btn card-link">
+                        <span v-if="e.Enabled" class="oi oi-power-standby text-success"></span>
+                        <span v-else class="oi oi-power-standby text-danger"></span>
+                      </button>
+                      <button @click.prevent="removeEndpoint(key)" href="#" class="btn card-link">
+                        <span class="oi oi-trash" ></span> 
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <button type="submit" class="btn btn-primary mt-3">Submit</button>
-              <router-link to="/routes" class="btn btn-default mt-3">cancel</button>
+              <button type="submit" class="btn btn-primary mt-3">Save</button>
+              <router-link to="/routes" class="btn btn-default mt-3">Cancel</button>
             </form>
           </div>
       </div>
@@ -233,23 +425,44 @@
 
     <!-- Conifguration Template -->
     <script type="text/x-template" id="configuration">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-            <h1 class="h2">{{ title }}</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-              <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">Share</button>
-                <button class="btn btn-sm btn-outline-secondary">Export</button>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col">
+            <btn-toolbar title="Configuration"></btn-toolbar>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <form>
+              <div class="form-group">
+                <label for="exampleInputEmail1">API Port</label>
+                <input v-model="config.APIPort" type="text" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Port Number">
+                <small id="emailHelp" class="form-text text-muted">This is the port that the server API will listen on. http://locahost:<strong>[port]</strong></small>
               </div>
-              <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                <span data-feather="calendar"></span>
-                This week
-              </button>
-            </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">RTMP Port</label>
+                <input v-model="config.RTMPPort" type="text" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Port Number">
+                <small id="emailHelp" class="form-text text-muted">This is the port that the RTMP server will listen on. rtmp://locahost:<strong>[port]</strong></small>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">HLS Port</label>
+                <input v-model="config.HLSPort" type="text" class="form-control form-control-sm" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Port Number">
+                <small id="emailHelp" class="form-text text-muted">This is the port that the HLS server will listen on. http://locahost:<strong>[port]</strong></small>
+              </div>
+              <hr>
+              <h5>Backend</h5>
+              <ul class="list-group">
+                <li class="list-group-item" v-for="(v, k) in config.Backend" :key="k"> <span class="h6">{{k}}:</span> <span class="h5 text-info">{{v}}</span> </li>
+              </ul>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
           </div>
-
-          <h2>Section title</h2>
-             
-          </div>
+        </div>
+      </div>
     </script>
 
     <!-- Stats Template -->
@@ -298,6 +511,7 @@
     <!-- Placed at the end of the document so the pages load faster -->
 
     <script src="/assets/js/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="/assets/js/lodash.min.js" crossorigin="anonymous"></script>
     <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
     <script src="/assets/js/popper.min.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>

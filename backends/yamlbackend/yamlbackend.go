@@ -125,6 +125,11 @@ func (y DB) Delete(id string) error {
 func (y DB) Update(id string, newRoute models.Route) (models.Route, error) {
 	rts := y.NewRoutesInstance()
 	if _, exist := rts[id]; exist {
+		for _, v := range newRoute.Endpoints {
+			if v.ID == "" {
+				v.ID = ksuid.New().String()
+			}
+		}
 		rts[id] = newRoute
 		if err := y.save(); err != nil {
 			return models.Route{}, err

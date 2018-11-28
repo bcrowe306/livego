@@ -3,6 +3,7 @@ package api
 import (
 	"livego/backends"
 	"livego/backends/models"
+	"livego/config"
 	"log"
 	"net/http"
 
@@ -24,6 +25,7 @@ func Start(port string) {
 	})
 	v := r.Group("/api")
 	{
+		// /api/routes ---------
 		v.GET("/routes", func(c *gin.Context) {
 			r := backends.DB.SelectAll()
 			c.JSON(http.StatusOK, r)
@@ -79,6 +81,11 @@ func Start(port string) {
 				})
 			}
 			c.JSON(http.StatusOK, updatedRoute)
+		})
+
+		// /api/config ---------------------------------
+		v.GET("/config", func(c *gin.Context) {
+			c.JSON(http.StatusOK, config.Data)
 		})
 	}
 

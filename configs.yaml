@@ -1,5 +1,6 @@
-apiport: 8080
+apiport: 1234
 rtmpport: 1935
+hlsport: 7002
 backend:
   name: yaml
   file: "./routes.yaml"

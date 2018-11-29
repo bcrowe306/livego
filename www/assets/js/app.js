@@ -46,7 +46,16 @@ const Routes = {
             routes: {}
         }
     },
-    methods: {},
+    methods: {
+        toggleRoute: function (id) {
+            this.routes[id].Enabled = !this.routes[id].Enabled
+            this.$http.put(`/api/routes/${id}`, this.routes[id]).then(res => {
+                this.$http.get(`/api/routes`).then(resp => {
+                    this.routes = resp.data
+                })
+            })
+        },
+    },
     computed: {}
 }
 const Route = { 
@@ -60,7 +69,12 @@ const Route = {
     data : function () {
         return {
             title: 'Route',
-            route: {},
+            route: {
+                Stream: "",
+                CopyKey: false,
+                Enabled: true,
+                Endpoints: []
+            },
             app: "",
             newEndpoint: {
                 Host: '',
@@ -87,6 +101,9 @@ const Route = {
             this.route.Endpoints[i].Enabled = !this.route.Endpoints[i].Enabled
         },
         addEndpoint: function (){
+            if(this.route.Endpoints == null || typeof this.route.Endpoints == "undefined"){
+                this.route.Endpoints = []
+            }
             this.route.Endpoints.push(Vue.util.extend({}, this.newEndpoint))
             $('#addEndpoint').modal('hide')
         },

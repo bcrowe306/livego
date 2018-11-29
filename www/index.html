@@ -219,7 +219,7 @@
                     <td>
                       <h6 v-for="(e, key) in r.Endpoints">rtmp://{{e.Host}}/{{e.App}}/{{e.Stream}} </h6>
                     </td>
-                    <td><a href=""><span :class="[r.Enabled ? 'text-success' : 'text-danger']" class="oi oi-power-standby"></span></a></td>
+                    <td><a @click.prevent="toggleRoute(key)" href=""><span :class="[r.Enabled ? 'text-success' : 'text-danger']" class="oi oi-power-standby"></span></a></td>
                     <td><a href=""><span class="oi oi-trash text-info"></span></a></td>
                   </tr>
                 </tbody>

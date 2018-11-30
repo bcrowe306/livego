@@ -83,7 +83,9 @@ func (y *DB) save() error {
 func (y DB) Insert(r models.Route) (models.Route, error) {
 	rts := y.NewRoutesInstance()
 	for i := range r.Endpoints {
+		log.Println("Adding ID to endpoint")
 		r.Endpoints[i].ID = ksuid.New().String()
+		log.Println(r.Endpoints[i].ID)
 	}
 	routeID := ksuid.New().String()
 	rts[routeID] = r
@@ -125,9 +127,9 @@ func (y DB) Delete(id string) error {
 func (y DB) Update(id string, newRoute models.Route) (models.Route, error) {
 	rts := y.NewRoutesInstance()
 	if _, exist := rts[id]; exist {
-		for _, v := range newRoute.Endpoints {
-			if v.ID == "" {
-				v.ID = ksuid.New().String()
+		for i := range newRoute.Endpoints {
+			if newRoute.Endpoints[i].ID == "" {
+				newRoute.Endpoints[i].ID = ksuid.New().String()
 			}
 		}
 		rts[id] = newRoute

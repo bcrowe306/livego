@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"livego/backends"
 	"livego/backends/models"
+	"net/url"
 	"strings"
 )
 
@@ -28,6 +29,23 @@ func SelectRoute(url string) (models.Route, bool) {
 		return models.Route{}, false
 	}
 	return r, true
+}
+
+// GetEndpointbyURL :This function return the endpoint by the URL
+func GetEndpointbyURL(rawurl string) (models.Endpoint, bool) {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return models.Endpoint{}, false
+	}
+	urlArray := strings.Split(u.Path, "/")
+	for _, rt := range backends.DB.SelectAll() {
+		for _, e := range rt.Endpoints {
+			if u.Host == e.Host && urlArray[1] == e.App && urlArray[2] == e.Stream {
+				return e, true
+			}
+		}
+	}
+	return models.Endpoint{}, false
 }
 
 // GetRoute :This function retrieves the route based on the app name, and reurn an array of endpoint urls

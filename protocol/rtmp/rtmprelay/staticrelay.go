@@ -3,6 +3,7 @@ package rtmprelay
 import (
 	"errors"
 	"fmt"
+	"livego/backends/models"
 	"livego/router"
 	"log"
 	"sync"
@@ -12,6 +13,7 @@ import (
 )
 
 type StaticPush struct {
+	Route         models.Route
 	RtmpUrl       string
 	packet_chan   chan *av.Packet
 	sndctrl_chan  chan string
@@ -36,14 +38,14 @@ func GetStaticPushList(appname string) ([]string, error) {
 	return pushurlList, nil
 }
 
-func GetAndCreateStaticPushObject(rtmpurl string) *StaticPush {
+func GetAndCreateStaticPushObject(rtmpurl string, r models.Route) *StaticPush {
 	g_MapLock.RLock()
 	staticpush, ok := G_StaticPushMap[rtmpurl]
 	log.Printf("GetAndCreateStaticPushObject: %s, return %v", rtmpurl, ok)
 	if !ok {
 		g_MapLock.RUnlock()
 		newStaticpush := NewStaticPush(rtmpurl)
-
+		newStaticpush.Route = r
 		g_MapLock.Lock()
 		G_StaticPushMap[rtmpurl] = newStaticpush
 		g_MapLock.Unlock()
@@ -55,12 +57,27 @@ func GetAndCreateStaticPushObject(rtmpurl string) *StaticPush {
 	return staticpush
 }
 
-func GetStaticPushObject(rtmpurl string) (*StaticPush, error) {
+func GetStaticPushObject(rtmpurl string, r models.Route) (*StaticPush, error) {
 	g_MapLock.RLock()
 	if staticpush, ok := G_StaticPushMap[rtmpurl]; ok {
 		g_MapLock.RUnlock()
 		return staticpush, nil
 	}
+	// rtmpurl does not exist in StaticPushMap. Check fo EndpointID to see if we have updated the endpoint
+	newE, exist := router.GetEndpointbyURL(rtmpurl)
+	for u, st := range G_StaticPushMap {
+		for _, e := range st.Route.Endpoints {
+			if newE.ID == e.ID {
+
+				// Stop the old endpoint
+				st.Stop()
+				ReleaseStaticPushObject(u)
+
+			}
+		}
+	}
+
+	log.Println(exist)
 	g_MapLock.RUnlock()
 
 	return nil, errors.New(fmt.Sprintf("G_StaticPushMap[%s] not exist...."))

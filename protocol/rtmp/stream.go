@@ -171,6 +171,8 @@ func (s *Stream) StartStaticPush() {
 	appname := dscr[0]
 
 	log.Printf("StartStaticPush: current， appname=%s", appname)
+
+	// Get Route from router
 	r, exist := router.SelectRoute(key)
 
 	if !exist {
@@ -186,8 +188,9 @@ func (s *Stream) StartStaticPush() {
 			} else {
 				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, e.Stream)
 			}
+
 			// Add endpoint to Push Map Object and retrieve
-			staticpushObj := rtmprelay.GetAndCreateStaticPushObject(pushurl)
+			staticpushObj := rtmprelay.GetAndCreateStaticPushObject(pushurl, r)
 			if staticpushObj != nil {
 				if err := staticpushObj.Start(); err != nil {
 					log.Printf("StartStaticPush: staticpushObj.Start %s error=%v", pushurl, err)
@@ -202,6 +205,7 @@ func (s *Stream) StartStaticPush() {
 	}
 }
 
+// StopStaticPush :This function Stops the push by stoping the staticpushobject and releasing it from the object.
 func (s *Stream) StopStaticPush() {
 	key := s.info.Key
 
@@ -220,23 +224,37 @@ func (s *Stream) StopStaticPush() {
 	appname := dscr[0]
 
 	log.Printf("StopStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(key)
-	if err != nil || len(pushurllist) < 1 {
-		log.Printf("StopStaticPush: GetStaticPushList error=%v", err)
+
+	r, exist := router.SelectRoute(key)
+
+	if !exist {
+		log.Printf("StopStaticPush: GetStaticPushList error=%v", key)
 		return
 	}
 
-	for _, pushurl := range pushurllist {
-		pushurl := pushurl + "/" + streamname
-		log.Printf("StopStaticPush: static pushurl=%s", pushurl)
+	// Loop over Route Endpoints, creating push urls
+	for _, e := range r.Endpoints {
+		if e.Enabled {
 
-		staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl)
-		if (staticpushObj != nil) && (err == nil) {
-			staticpushObj.Stop()
-			rtmprelay.ReleaseStaticPushObject(pushurl)
-			log.Printf("StopStaticPush: staticpushObj.Stop %s ", pushurl)
-		} else {
-			log.Printf("StopStaticPush GetStaticPushObject %s error", pushurl)
+			// Gernerate PushURL
+			var pushurl string
+			if r.CopyKey {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, key)
+			} else {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, e.Stream)
+			}
+
+			log.Printf("StopStaticPush: static pushurl=%s", pushurl)
+
+			// Add endpoint to Push Map Object and retrieve
+			staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl, r)
+			if (staticpushObj != nil) && (err == nil) {
+				staticpushObj.Stop()
+				rtmprelay.ReleaseStaticPushObject(pushurl)
+				log.Printf("StopStaticPush: staticpushObj.Stop %s ", pushurl)
+			} else {
+				log.Printf("StopStaticPush GetStaticPushObject %s error", pushurl)
+			}
 		}
 	}
 }
@@ -248,30 +266,36 @@ func (s *Stream) IsSendStaticPush() bool {
 		return false
 	}
 
-	//log.Printf("SendStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(key)
-	if err != nil || len(pushurllist) < 1 {
-		//log.Printf("SendStaticPush: GetStaticPushList error=%v", err)
+	r, exist := router.SelectRoute(key)
+	// If the route does not exist, return false
+	if !exist {
 		return false
 	}
 
-	// Check stream URL for correct format
+	// Check stream URL for correct format. Return false on errors
 	index := strings.Index(key, "/")
 	if index < 0 {
 		return false
 	}
 
-	// Enumertate pushlist
-	for _, pushurl := range pushurllist {
-		//log.Printf("SendStaticPush: static pushurl=%s", pushurl)
+	// Loop over Route Endpoints, creating push urls
+	for _, e := range r.Endpoints {
+		if e.Enabled {
 
-		staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl)
-		if (staticpushObj != nil) && (err == nil) {
-			return true
-			//staticpushObj.WriteAvPacket(&packet)
-			//log.Printf("SendStaticPush: WriteAvPacket %s ", pushurl)
-		} else {
-			log.Printf("SendStaticPush GetStaticPushObject %s error", pushurl)
+			// Gernerate PushURL
+			var pushurl string
+			if r.CopyKey {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, key)
+			} else {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, e.Stream)
+			}
+
+			staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl, r)
+			if (staticpushObj != nil) && (err == nil) {
+				return true
+			} else {
+				log.Printf("isSendStaticPush GetStaticPushObject %s error", pushurl)
+			}
 		}
 	}
 	return false
@@ -290,29 +314,29 @@ func (s *Stream) SendStaticPush(packet av.Packet) {
 		return
 	}
 
-	// This variable was used to place the streamkey on the end of the URL. I don't want this behavior here.
-	// streamname := key[index+1:]
-	// appname := dscr[0]
-
-	//log.Printf("SendStaticPush: current streamname=%s， appname=%s", streamname, appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(key)
-	if err != nil || len(pushurllist) < 1 {
-		//log.Printf("SendStaticPush: GetStaticPushList error=%v", err)
+	r, exist := router.SelectRoute(key)
+	// If the route does not exist, return.
+	if !exist {
 		return
 	}
+	// Loop over Route Endpoints, creating push urls
+	for _, e := range r.Endpoints {
+		if e.Enabled {
 
-	for _, pushurl := range pushurllist {
+			// Gernerate PushURL
+			var pushurl string
+			if r.CopyKey {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, key)
+			} else {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, e.Stream)
+			}
 
-		// This code was taking the streamkey and placing it on the end of the url. I dont want this behavior to take place here
-		// pushurl := pushurl + "/" + streamname
-		//log.Printf("SendStaticPush: static pushurl=%s", pushurl)
-
-		staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl)
-		if (staticpushObj != nil) && (err == nil) {
-			staticpushObj.WriteAvPacket(&packet)
-			//log.Printf("SendStaticPush: WriteAvPacket %s ", pushurl)
-		} else {
-			log.Printf("SendStaticPush GetStaticPushObject %s error", pushurl)
+			staticpushObj, err := rtmprelay.GetStaticPushObject(pushurl, r)
+			if (staticpushObj != nil) && (err == nil) {
+				staticpushObj.WriteAvPacket(&packet)
+			} else {
+				log.Printf("SendStaticPush GetStaticPushObject %s error", pushurl)
+			}
 		}
 	}
 }

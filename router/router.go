@@ -3,10 +3,34 @@ package router
 import (
 	"fmt"
 	"livego/backends"
+	"livego/backends/models"
 	"strings"
 )
 
-// GetRoute :This function retrieves the route based on the app name
+// SelectRoute :This function retrieves the route based on the app name and return the whole route object.
+func SelectRoute(url string) (models.Route, bool) {
+	urlArray := strings.Split(url, "/")
+	// This condition checks for both /[app]/[key] exist in url
+	if len(urlArray) < 2 {
+		return models.Route{}, false
+	}
+
+	// Populate app and key from urlArray
+	app := urlArray[0]
+	key := urlArray[1]
+	r, exist := backends.DB.Select(app)
+	if !exist {
+		return models.Route{}, false
+	}
+
+	// If the Stream field is specified, match on it as well as the app
+	if r.Stream != "" && r.Stream != key {
+		return models.Route{}, false
+	}
+	return r, true
+}
+
+// GetRoute :This function retrieves the route based on the app name, and reurn an array of endpoint urls
 func GetRoute(url string) ([]string, bool) {
 	urlArray := strings.Split(url, "/")
 	// This condition checks for both /[app]/[key] exist in url

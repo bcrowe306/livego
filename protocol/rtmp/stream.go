@@ -2,11 +2,13 @@ package rtmp
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"livego/protocol/rtmp/rtmprelay"
+	"livego/router"
 
 	"github.com/gwuhaolin/livego/av"
 	"github.com/gwuhaolin/livego/protocol/rtmp/cache"
@@ -169,27 +171,33 @@ func (s *Stream) StartStaticPush() {
 	appname := dscr[0]
 
 	log.Printf("StartStaticPush: current， appname=%s", appname)
-	pushurllist, err := rtmprelay.GetStaticPushList(key)
+	r, exist := router.SelectRoute(key)
 
-	if err != nil || len(pushurllist) < 1 {
-		log.Printf("StartStaticPush: GetStaticPushList error=%v", err)
-		return
+	if !exist {
+		log.Printf("StartStaticPush: Route not found for url: %v", key)
 	}
-	for _, pushurl := range pushurllist {
 
-		// This code again added the streamkey to the end of the stream url. I do not want this functionality to take place here
-		// pushurl := pushurl + "/" + streamname
-		log.Printf("StartStaticPush: static pushurl=%s", pushurl)
-
-		staticpushObj := rtmprelay.GetAndCreateStaticPushObject(pushurl)
-		if staticpushObj != nil {
-			if err := staticpushObj.Start(); err != nil {
-				log.Printf("StartStaticPush: staticpushObj.Start %s error=%v", pushurl, err)
+	// Loop over Route Endpoints, creating push urls
+	for _, e := range r.Endpoints {
+		if e.Enabled {
+			var pushurl string
+			if r.CopyKey {
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, key)
 			} else {
-				log.Printf("StartStaticPush: staticpushObj.Start %s ok", pushurl)
+				pushurl = fmt.Sprintf("rtmp://%v/%v/%v", e.Host, e.App, e.Stream)
 			}
-		} else {
-			log.Printf("StartStaticPush GetStaticPushObject %s error", pushurl)
+			// Add endpoint to Push Map Object and retrieve
+			staticpushObj := rtmprelay.GetAndCreateStaticPushObject(pushurl)
+			if staticpushObj != nil {
+				if err := staticpushObj.Start(); err != nil {
+					log.Printf("StartStaticPush: staticpushObj.Start %s error=%v", pushurl, err)
+				} else {
+					log.Printf("StartStaticPush: staticpushObj.Start %s ok", pushurl)
+				}
+			} else {
+				log.Printf("StartStaticPush GetStaticPushObject %s error", pushurl)
+			}
+			log.Printf("StartStaticPush: static pushurl=%s", pushurl)
 		}
 	}
 }

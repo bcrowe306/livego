@@ -30,8 +30,8 @@ func init() {
 	flag.Parse()
 }
 
-func startHls() *hls.Server {
-	hlsListen, err := net.Listen("tcp", *hlsAddr)
+func startHls(port string) *hls.Server {
+	hlsListen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func startHls() *hls.Server {
 				log.Println("HLS server panic: ", r)
 			}
 		}()
-		log.Println("HLS listen On", *hlsAddr)
+		log.Println("HLS listen On", config.Data.HLSPort)
 		hlsServer.Serve(hlsListen)
 	}()
 	return hlsServer
@@ -70,7 +70,7 @@ func startRtmp(stream *rtmp.RtmpStream, hlsServer *hls.Server) {
 			log.Println("RTMP server panic: ", r)
 		}
 	}()
-	log.Println("RTMP Listen On", *rtmpAddr)
+	log.Println("RTMP Listen On", config.Data.RTMPPort)
 	rtmpServer.Serve(rtmpListen)
 }
 
@@ -110,6 +110,17 @@ func startHTTPOpera(stream *rtmp.RtmpStream) {
 		}()
 	}
 }
+func startAPI(port string) {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("HTTP-Operation server panic: ", r)
+			}
+		}()
+		log.Println("HTTP-API listen On", port)
+		api.Start(port)
+	}()
+}
 
 func main() {
 	defer func() {
@@ -132,10 +143,11 @@ func main() {
 	// 	return
 	// }
 	stream := rtmp.NewRtmpStream()
-	hlsServer := startHls()
+	hlsServer := startHls(config.Data.HLSPort)
 	startHTTPFlv(stream)
 	// startHTTPOpera(stream)
-	api.Start(config.Data.APIPort)
+	startAPI(config.Data.APIPort)
 	startRtmp(stream, hlsServer)
 	//startRtmp(stream, nil)
+
 }

@@ -1,5 +1,8 @@
 rtmpport: "1935"
 apiport: "8080"
+hlsport: "7003"
+username: "admin"
+password: "password"
 backend:
   file: ./routes.yaml
   name: yaml

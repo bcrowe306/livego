@@ -18,6 +18,8 @@ type Config struct {
 	APIPort  string            `yaml:"apiport"`
 	HLSPort  string            `yaml:"hlsport"`
 	Backend  map[string]string `yaml:"backend"`
+	Username string            `yaml:"username"`
+	Password string            `yaml:"password"`
 }
 
 var defaultConfig = Config{
@@ -28,6 +30,8 @@ var defaultConfig = Config{
 		"name": "yaml",
 		"file": "./routes.yaml",
 	},
+	Username: "admin",
+	Password: "password",
 }
 
 // LoadConfig :This function loads the configuration from the specified file.
@@ -36,6 +40,7 @@ func LoadConfig(fileName string) error {
 	if err != nil {
 		// If the config file does not exist we create it with default options.
 		if os.IsNotExist(err) {
+			log.Println("Creating configuration file with default values")
 			outBytes, err := yaml.Marshal(defaultConfig)
 			if err != nil {
 				log.Println("Error Marshalling defaultConfig to outBytes")

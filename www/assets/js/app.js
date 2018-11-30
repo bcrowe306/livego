@@ -8,7 +8,7 @@ const Dashboard = {
         this.$http.get('/api/config').then(res => {
             this.config = res.data
         }).catch(err => {
-            console.log(err)
+            console.log(err.response)
         })
     },
     data : function () {
@@ -55,6 +55,17 @@ const Routes = {
                 })
             })
         },
+        deleteRoute: function (id) {
+            if (confirm(`Are you sure you want to delete this route?`)){
+                this.$http.delete(`/api/routes/${id}`).then(res => {
+                    return this.$http.get('/api/routes')
+                }).then(resp => {
+                    this.routes = resp.data
+                }).catch(err => {
+                    alert("Error Deleting Route")
+                })
+            } 
+        }
     },
     computed: {}
 }
@@ -119,6 +130,15 @@ const Route = {
         },
         removeEndpoint: function(i){
             this.route.Endpoints.splice(i,1)
+        },
+        deleteRoute: function () {
+            if (confirm(`Are you sure you want to delete this route?`)) {
+                this.$http.delete(`/api/routes/${this.$route.params.id}`).then(res => {
+                    this.$router.push('/routes')
+                }).then(resp => {
+                    this.routes = resp.data
+                })
+            }
         },
         save: function () {
             this.$http.put(`/api/routes/${this.$route.params.id}`, this.route).then(res => {
@@ -239,19 +259,128 @@ Vue.component('bCard', {
     template: "#card",
     props:['title', 'content', 'header']
 })
+
+// Home Component
+const Home = { 
+    template: '#home' ,
+    created: {},
+    data : function () {
+        return {
+            title: 'Home'
+        }
+    },
+    methods: {
+        logout: function () {
+            localStorage.removeItem('token')
+            this.$router.push('/login')
+        }
+    },
+    computed: {}
+}
+
+// Login
+const Login = { 
+    template: '#login' ,
+    created: {},
+    data : function () {
+        return {
+            title: 'Login',
+            user:{
+                username: '',
+                password: ''
+            }
+        }
+    },
+    methods: {
+        login: function () {
+            this.$http.post('/login', this.user).then(res => {
+                localStorage.setItem('token', res.data.token)
+                this.$router.push('/')
+            }).catch(err => {
+                console.log(err)
+            })
+        }
+    },
+    computed: {}
+}
+Vue.component('btnToolbar', {
+    template: '#btn-toolbar',
+    props:["title"]
+})
+Vue.component('bCard', {
+    template: "#card",
+    props:['title', 'content', 'header']
+})
 const routes = [
-    { path: '/', redirect: '/dashboard'},
-    { path: '/dashboard', component: Dashboard },
-    { path: '/routes', component: Routes },
-    { path: '/routes/new', component: NewRoute },
-    { path: '/routes/:id', component: Route },
-    { path: '/configuration', component: Configuration },
-    { path: '/stats', component: Stats },
-    { path: '/admin', component: Admin },
+    { 
+        path: '/', 
+        redirect: '/dashboard',
+        component: Home, 
+        children:[
+            { path: 'dashboard', component: Dashboard, name: "Dashboard", meta:{protected:true} },
+            { path: 'routes', component: Routes, name: "Routes" },
+            { path: 'routes/new', component: NewRoute, name: "New Route" },
+            { path: 'routes/:id', component: Route, name: "Route" },
+            { path: 'configuration', component: Configuration, name: "Configuration" },
+            { path: 'stats', component: Stats, name: "Stats" },
+            { path: 'admin', component: Admin, name: "Admin" }
+        ]
+    },
+    {
+        path: '/login', component: Login, name: "Login"
+    }
+    
 ]
 const router = new VueRouter({
     routes, // short for `routes: routes`
     linkActiveClass: "active"
+})
+
+// Setup axios auth interceptor
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    var token = localStorage.getItem('token')
+    config.headers = {
+        Authorization: `Bearer ${token}`
+    }
+    return config;
+}, function (error) {
+    // Do something with request error
+    console.log(error)
+    return Promise.reject(error);
+});
+
+axios.interceptors.response.use(function (response) {
+    // Do something with response data
+    return response;
+}, function (error) {
+    // Do something with response error
+    if(error.response.status == 401){
+        localStorage.removeItem('token')
+        router.push('/login')
+    }
+    return Promise.reject(error);
+});
+
+
+// HasToken checks if JWT token exist.
+function HasToken(){
+    return localStorage.getItem('token') != null
+}
+router.beforeEach((to, from, next) => {
+
+    // If the route is protected then check for token
+    if(to.meta.protected){
+        if (HasToken()) {
+            next()
+        } else {
+            next('/login')
+        }
+    }else{
+        next()
+    }
+    
+    
 })
 Vue.prototype.$http = axios
 const app = new Vue({

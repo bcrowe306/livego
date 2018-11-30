@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-var db = backends.DB
-
 // GetRoute :This function retrieves the route based on the app name
 func GetRoute(url string) ([]string, bool) {
 	urlArray := strings.Split(url, "/")
@@ -19,7 +17,7 @@ func GetRoute(url string) ([]string, bool) {
 	// Populate app and key from urlArray
 	app := urlArray[0]
 	key := urlArray[1]
-	r, exist := db.Select(app)
+	r, exist := backends.DB.Select(app)
 	if !exist {
 		return nil, false
 	}
@@ -54,7 +52,7 @@ func GetRoute(url string) ([]string, bool) {
 
 // CheckAppName : Check to make sure the app exist in backend
 func CheckAppName(appname string) bool {
-	_, exist := db.Select(appname)
+	_, exist := backends.DB.Select(appname)
 	if !exist {
 		return false
 	}

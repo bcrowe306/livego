@@ -16,56 +16,7 @@
 
   <body>
     <div id="app">
-      <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Flowvizer Edge</a>
-        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
-        <ul class="navbar-nav px-3">
-          <li class="nav-item text-nowrap">
-            <a class="nav-link" href="#">Sign out</a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="container-fluid">
-        <div class="row">
-          <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-              <ul class="nav flex-column">
-                <li class="nav-item">
-                  <router-link class="nav-link" to="/dashboard"><span data-feather="home"></span>
-                  Dashboard <span class="sr-only">(current)</span></router-link>
-                </li>
-                <li class="nav-item">
-                  <router-link class="nav-link" to="/routes">
-                    <span data-feather="file"></span>
-                    Routes
-                  </router-link>
-                </li>
-                <li class="nav-item">
-                  <router-link class="nav-link" to="/configuration">
-                    <span data-feather="shopping-cart"></span>
-                    Configuration
-                  </router-link>
-                </li>
-                <li class="nav-item">
-                  <router-link class="nav-link" to="/stats">
-                    <span data-feather="users"></span>
-                    Stats
-                  </router-link>
-                </li>
-                <li class="nav-item">
-                  <router-link class="nav-link" to="/admin">
-                    <span data-feather="bar-chart-2"></span>
-                    Admin
-                  </router-link>
-                </li>
-              </ul>
-            </nav>
-          <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-            <router-view></router-view>
-          </main>
-        </div>
-      </div>
+      <router-view></router-view>
     </div>
 
     <!-- Components -->
@@ -80,11 +31,12 @@
       </div>
     </script>
 
+    <!-- btn-toolbar Component -->
     <script type="text/x-template" id="btn-toolbar">
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <span v-if="title" class="h2">{{title}}</span>
-        <slot name="title"><slot>
-        <slot><slot>
+        <slot name="title"></slot>
+        <slot></slot>
         <slot name="actions"></slot>
       </div>
     </script>
@@ -92,9 +44,99 @@
 
     <!-- Templates -->
 
+    <!-- Login Template -->
+    <script type="text/x-template" id="login">
+      <div style="height:100%;" class="container-fluid bg-light">
+        <div style="height:100vh" class="row justify-content-center align-items-center">
+          <div class="col-xs-12 col-lg-3">
+            <div class="card shadow-lg p-3">
+              
+              <div class="card-body">
+                <div class="card-title h3 mb-3 font-weight-normal text-info text-center">FLVZR-EDGE</div>
+                <form class="form-signin" @submit.prevent="login()">
+                
+                <label for="inputEmail" class="sr-only">Email address</label>
+                <input v-model="user.username" type="text" id="inputEmail" class="form-control mb-3" placeholder="Username" required autofocus>
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input v-model="user.password" type="password" id="inputPassword" class="form-control mb-3" placeholder="Password" required>
+                <div class="checkbox mb-3">
+                  <label>
+                    <input type="checkbox" value="remember-me"> Remember me
+                  </label>
+                </div>
+                <button class="btn btn-lg btn-info btn-block" type="submit">Sign in</button>
+                <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
+              </form>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </script>
+
+    <!-- Home Template -->
+    <script type="text/x-template" id="home">
+      <div>
+      <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Flowvizer Edge</a>
+        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+        <ul class="navbar-nav px-3">
+          <li class="nav-item text-nowrap">
+            <a @click.prevent="logout()" class="nav-link" href="#">Sign Out</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="container-fluid">
+        <div class="row">
+          <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <router-link class="nav-link" to="/dashboard">
+                    <span class="oi oi-dashboard"></span>
+                  Dashboard <span class="sr-only">(current)</span></router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link class="nav-link" to="/routes">
+                    <span class="oi oi-project"></span>
+                    Routes
+                  </router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link class="nav-link" to="/configuration">
+                    <span class="oi oi-cog"></span>
+                    Configuration
+                  </router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link class="nav-link" to="/stats">
+                    <span class="oi oi-spreadsheet"></span>
+                    Stats
+                  </router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link class="nav-link" to="/admin">
+                    <span class="oi oi-shield"></span>
+                    Admin
+                  </router-link>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+            <router-view></router-view>
+          </main>
+      </div>
+    </div>
+  </div>
+    </script>
+
     <!-- Dashboard Template -->
     <script type="text/x-template" id="dashboard">
-      <div class="container-fluid">
+      <div class="container-fluid bg-white">
         <div class="row">
           <div class="col">
             <btn-toolbar :title="title">
@@ -195,8 +237,6 @@
                 <div>
                   <div class="btn-group" role="group" aria-label="Basic example">
                     <button @click.prevent="$router.push('/routes/new')" type="button" class="btn btn-info btn-sm">Add Route</button>
-                    <button type="button" class="btn btn-secondary btn-sm">Middle</button>
-                    <button type="button" class="btn btn-secondary btn-sm">Right</button>
                   </div>
                 </div>
               </div>
@@ -220,7 +260,7 @@
                       <h6 v-for="(e, key) in r.Endpoints">rtmp://{{e.Host}}/{{e.App}}/{{e.Stream}} </h6>
                     </td>
                     <td><a @click.prevent="toggleRoute(key)" href=""><span :class="[r.Enabled ? 'text-success' : 'text-danger']" class="oi oi-power-standby"></span></a></td>
-                    <td><a href=""><span class="oi oi-trash text-info"></span></a></td>
+                    <td><a href="" @click.prevent="deleteRoute(key)"><span class="oi oi-trash text-info"></span></a></td>
                   </tr>
                 </tbody>
               </table>
@@ -359,12 +399,15 @@
               <template slot="title">
                 <div>
                   <span class="h4">Application</span>
-                  <span class="h5">{{app}}</span>
+                  <span class="h5 text-info">{{app}}</span>
                 </div>
                 <div class="btn-group" role="group" aria-label="Basic example">
-                  <button @click.prevent="showAddEndpoint()" type="button" class="btn btn-info btn-sm">Add Endpoint</button>
-                  <button type="button" class="btn btn-secondary btn-sm">Middle</button>
-                  <button type="button" class="btn btn-secondary btn-sm">Right</button>
+                  <button @click.prevent="showAddEndpoint()" type="button" class="btn btn-info btn-sm">
+                    <span class="oi oi-plus mr-2"> </span>Endpoint
+                  </button>
+                  <button @click.prevent="deleteRoute()" type="button" class="btn btn-secondary btn-sm">
+                    <span class="oi oi-trash mr-1"></span> Delete
+                  </button>
                 </div>
               </template>
                 
@@ -516,7 +559,7 @@
     <script src="/assets/js/popper.min.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>
     <script src="/assets/js/axios.min.js"></script>
-    <script src="/assets/js/vue.min.js"></script>
+    <script src="/assets/js/vue.js"></script>
     <script src="/assets/js/vue-router.js"></script>
     <!-- Icons -->
     <script src="/assets/js/feather.min.js"></script>

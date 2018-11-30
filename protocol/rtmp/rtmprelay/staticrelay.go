@@ -3,11 +3,12 @@ package rtmprelay
 import (
 	"errors"
 	"fmt"
-	"github.com/gwuhaolin/livego/av"
-	"github.com/gwuhaolin/livego/configure"
-	"github.com/gwuhaolin/livego/protocol/rtmp/core"
+	"livego/router"
 	"log"
 	"sync"
+
+	"github.com/gwuhaolin/livego/av"
+	"github.com/gwuhaolin/livego/protocol/rtmp/core"
 )
 
 type StaticPush struct {
@@ -26,7 +27,7 @@ var (
 )
 
 func GetStaticPushList(appname string) ([]string, error) {
-	pushurlList, ok := configure.GetStaticPushUrlList(appname)
+	pushurlList, ok := router.GetRoute(appname)
 
 	if !ok {
 		return nil, errors.New("no static push url")

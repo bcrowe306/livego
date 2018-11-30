@@ -170,11 +170,11 @@ func (s *Stream) StartStaticPush() {
 
 	log.Printf("StartStaticPush: current， appname=%s", appname)
 	pushurllist, err := rtmprelay.GetStaticPushList(key)
+
 	if err != nil || len(pushurllist) < 1 {
 		log.Printf("StartStaticPush: GetStaticPushList error=%v", err)
 		return
 	}
-
 	for _, pushurl := range pushurllist {
 
 		// This code again added the streamkey to the end of the stream url. I do not want this functionality to take place here
@@ -247,11 +247,13 @@ func (s *Stream) IsSendStaticPush() bool {
 		return false
 	}
 
+	// Check stream URL for correct format
 	index := strings.Index(key, "/")
 	if index < 0 {
 		return false
 	}
 
+	// Enumertate pushlist
 	for _, pushurl := range pushurllist {
 		//log.Printf("SendStaticPush: static pushurl=%s", pushurl)
 

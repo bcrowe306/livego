@@ -3,7 +3,7 @@
   Enabled: true
   Endpoints:
   - ID: ""
-    Host: bcrowe.softether.net
+    Host: 172.16.1.155
     Port: "1935"
     App: live
     Stream: 41a11e05-f250-4e54-86f8-6c90d660971e

@@ -6,6 +6,13 @@ release:
     name: livego
   disable: true
   prerelease: auto
+archive:
+  wrap_in_directory: true
+  files:
+    - LICENSE.txt
+    - README.md
+    - CHANGELOG.md
+    - www/**/*
 env_files:
   github_token: ./github_token
 build:

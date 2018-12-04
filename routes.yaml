@@ -1,10 +1,17 @@
 1DaXInTbOFrTdNW8ep3rZ8JuDtE:
   CopyKey: false
   Enabled: true
+  Metadata: {}
   Endpoints:
   - ID: 1DhH9WzuUwyem16gLKUjz0XyJGc
     Host: 172.16.1.146
     Port: "1935"
     App: live
-    Stream: 41a11e05-f250-4e54-86f8-6c90d660971e
+    Stream: 919a74f3-0397-4be1-a311-831e706b5b61
+    Enabled: true
+  - ID: 1DimJ7ARbFfv8N8ntMI9DqWqnz6
+    Host: 172.16.1.157
+    Port: "1935"
+    App: live
+    Stream: 2c62e075-4cab-40a9-a1a5-aa7549a12f2f
     Enabled: true

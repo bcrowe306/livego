@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/appleboy/gin-jwt"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -110,10 +111,11 @@ func Start(port string) {
 	r.POST("/login", authMiddleware.LoginHandler)
 	r.GET("/refresh_token", authMiddleware.RefreshHandler)
 	r.LoadHTMLFiles("./www/index.html")
-	r.Static("/assets", "./www./assets")
+	// r.Static("/assets", "./www./assets")
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{"user": "bcrowe"})
 	})
+	r.Use(static.Serve("/assets", static.LocalFile("./www/assets", true)))
 	v := r.Group("/api")
 	v.Use(authMiddleware.MiddlewareFunc())
 	{

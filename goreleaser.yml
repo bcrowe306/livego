@@ -10,6 +10,8 @@ archive:
   wrap_in_directory: true
   files:
     - www/**/*
+    - flowvizer-edge.service
+    - install.sh
 env_files:
   github_token: ./github_token
 build:

@@ -4,7 +4,12 @@ release:
   github:
     owner: bcrowe306
     name: livego
+  disable: true
   prerelease: auto
+archive:
+  wrap_in_directory: true
+  files:
+    - www/**/*
 env_files:
   github_token: ./github_token
 build:

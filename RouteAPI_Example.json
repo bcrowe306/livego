@@ -1,6 +1,9 @@
 {
     "CopyKey": false,
     "Enabled": true,
+    "Metadata": {
+        
+    },
     "Endpoints": [
         {
             "ID": "1DZf4MM4kLayuz9BQVbiATl6jA1",

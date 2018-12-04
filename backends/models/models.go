@@ -12,8 +12,9 @@ type Endpoint struct {
 
 // Route : This struct defines a single route
 type Route struct {
-	Stream    string     `yaml:"Stream,omitempty"`
-	CopyKey   bool       `yaml:"CopyKey"`
-	Enabled   bool       `yaml:"Enabled"`
-	Endpoints []Endpoint `yaml:"Endpoints"`
+	Stream    string            `yaml:"Stream,omitempty"`
+	CopyKey   bool              `yaml:"CopyKey"`
+	Enabled   bool              `yaml:"Enabled"`
+	Metadata  map[string]string `yaml:"Metadata"`
+	Endpoints []Endpoint        `yaml:"Endpoints"`
 }

@@ -15,7 +15,7 @@ RestartSec=10
 startLimitIntervalSec=60
 
 WorkingDirectory=/usr/local/flowvizer-edge
-ExecStart=/usr/local/flowvizer-edge/flowvizer-edge
+ExecStart=/usr/local/flowvizer-edge/flowvizer-edge -c /etc/flowvizer-edge/config.yaml
 
 # make sure log directory exists and owned by syslog
 PermissionsStartOnly=true

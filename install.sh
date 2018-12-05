@@ -1,6 +1,7 @@
-mkdir /usr/local/flowvizer
+#!/bin/bash
+mkdir /usr/local/flowvizer-edge
 mkdir /etc/flowvizer-edge/
-cp -rf ./flowvizer-edge.service /etc/systemd/system/
+cp -f ./flowvizer-edge.service /etc/systemd/system/
 cp -rf ./* /usr/local/flowvizer-edge/
 cd /usr/local/flowvizer-edge
 mv ./livego ./flowvizer-edge

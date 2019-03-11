@@ -1,7 +1,6 @@
 1DaXInTbOFrTdNW8ep3rZ8JuDtE:
   CopyKey: false
   Enabled: true
-  Metadata: {}
   Endpoints:
   - ID: 1DhH9WzuUwyem16gLKUjz0XyJGc
     Host: 172.16.1.146
@@ -14,4 +13,10 @@
     Port: "1935"
     App: live
     Stream: 2c62e075-4cab-40a9-a1a5-aa7549a12f2f
+    Enabled: true
+  - ID: ""
+    Host: test.flowvizer.com
+    Port: "1935"
+    App: immaboss
+    Stream: Jerome@6
     Enabled: true
